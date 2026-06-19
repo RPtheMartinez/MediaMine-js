@@ -56,6 +56,30 @@ select {
   margin-bottom: 0.5rem;
 }
 
+.api-key-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.api-key-row input {
+  margin-bottom: 0;
+}
+
+.api-key-toggle {
+  width: auto;
+  margin-top: 0;
+  background: #e5e7eb;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.api-key-toggle:hover {
+  background: #d1d5db;
+}
+
 button {
   margin-top: 0.25rem;
   background: #2563eb;

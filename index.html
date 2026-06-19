@@ -13,12 +13,15 @@
 
       <section class="card">
         <label for="apiKey">NewsAPI Key</label>
-        <input
-          id="apiKey"
-          type="password"
-          placeholder="Enter your NewsAPI key"
-          autocomplete="off"
-        />
+        <div class="api-key-row">
+          <input
+            id="apiKey"
+            type="password"
+            placeholder="Enter your NewsAPI key"
+            autocomplete="off"
+          />
+          <button id="toggleApiKey" type="button" class="api-key-toggle" aria-pressed="false">Show</button>
+        </div>
         <small>
           Tip: Get a free key at
           <a href="https://newsapi.org/" target="_blank" rel="noreferrer">newsapi.org</a>
@@ -30,15 +33,14 @@
         <input
           id="stateInput"
           type="text"
-          placeholder="e.g., Cal, New, Tex"
+          placeholder="Start typing a state (e.g., Cal, Tex)"
+          list="stateSuggestions"
           autocomplete="off"
         />
-        <small>Type at least 3 characters to see matching states.</small>
+        <datalist id="stateSuggestions"></datalist>
+        <small>Type at least 3 characters, then pick from suggestions in this same field.</small>
 
         <div id="feedback" class="feedback" aria-live="polite"></div>
-
-        <label for="stateSelect" class="hidden" id="stateSelectLabel">Select a state</label>
-        <select id="stateSelect" class="hidden"></select>
 
         <button id="fetchBtn" disabled>Get News Headlines</button>
       </section>

@@ -12,13 +12,13 @@ const US_STATES = [
 ];
 
 const stateInput = document.getElementById("stateInput");
-const stateSelect = document.getElementById("stateSelect");
-const stateSelectLabel = document.getElementById("stateSelectLabel");
+const stateSuggestions = document.getElementById("stateSuggestions");
 const fetchBtn = document.getElementById("fetchBtn");
 const feedback = document.getElementById("feedback");
 const resultsTitle = document.getElementById("resultsTitle");
 const results = document.getElementById("results");
 const apiKeyInput = document.getElementById("apiKey");
+const toggleApiKeyBtn = document.getElementById("toggleApiKey");
 
 function filterStates(query) {
   if (!query || query.length < 3) return [];
@@ -26,30 +26,26 @@ function filterStates(query) {
   return US_STATES.filter((state) => state.toLowerCase().includes(q));
 }
 
-function clearSelect() {
-  stateSelect.innerHTML = "";
-  stateSelect.classList.add("hidden");
-  stateSelectLabel.classList.add("hidden");
-  fetchBtn.disabled = true;
+function resolveState(value) {
+  const normalized = value.trim().toLowerCase();
+  if (!normalized) return "";
+  const match = US_STATES.find((state) => state.toLowerCase() === normalized);
+  return match || "";
 }
 
-function renderSelect(matches) {
-  stateSelect.innerHTML = "";
-
-  const defaultOption = document.createElement("option");
-  defaultOption.value = "";
-  defaultOption.textContent = "Select a state...";
-  stateSelect.appendChild(defaultOption);
-
+function renderSuggestions(matches) {
+  stateSuggestions.innerHTML = "";
   matches.forEach((state) => {
     const option = document.createElement("option");
     option.value = state;
-    option.textContent = state;
-    stateSelect.appendChild(option);
+    stateSuggestions.appendChild(option);
   });
+}
 
-  stateSelect.classList.remove("hidden");
-  stateSelectLabel.classList.remove("hidden");
+function syncFetchButtonState() {
+  const selectedState = resolveState(stateInput.value);
+  const apiKey = apiKeyInput.value.trim();
+  fetchBtn.disabled = !selectedState || !apiKey;
 }
 
 function renderHeadlines(state, articles) {
@@ -108,32 +104,46 @@ stateInput.addEventListener("input", () => {
 
   if (value.length < 3) {
     feedback.textContent = "Type at least 3 characters.";
-    clearSelect();
+    renderSuggestions([]);
+    syncFetchButtonState();
     return;
   }
 
   const matches = filterStates(value);
+  renderSuggestions(matches);
 
   if (!matches.length) {
     feedback.textContent = "No matching states found.";
-    clearSelect();
+    syncFetchButtonState();
     return;
   }
 
-  feedback.textContent = `Found ${matches.length} matching state(s).`;
-  renderSelect(matches);
+  const selectedState = resolveState(value);
+  if (selectedState) {
+    feedback.textContent = `Ready to fetch headlines for ${selectedState}.`;
+    stateInput.value = selectedState;
+  } else {
+    feedback.textContent = `Found ${matches.length} matching state(s). Keep typing or pick a suggestion.`;
+  }
+
+  syncFetchButtonState();
 });
 
-stateSelect.addEventListener("change", () => {
-  fetchBtn.disabled = !stateSelect.value;
+apiKeyInput.addEventListener("input", syncFetchButtonState);
+
+toggleApiKeyBtn.addEventListener("click", () => {
+  const shouldShow = apiKeyInput.type === "password";
+  apiKeyInput.type = shouldShow ? "text" : "password";
+  toggleApiKeyBtn.textContent = shouldShow ? "Hide" : "Show";
+  toggleApiKeyBtn.setAttribute("aria-pressed", String(shouldShow));
 });
 
 fetchBtn.addEventListener("click", async () => {
-  const selectedState = stateSelect.value;
+  const selectedState = resolveState(stateInput.value);
   const apiKey = apiKeyInput.value.trim();
 
   if (!selectedState) {
-    feedback.textContent = "Please select a state first.";
+    feedback.textContent = "Please choose a valid U.S. state.";
     return;
   }
 
@@ -154,6 +164,6 @@ fetchBtn.addEventListener("click", async () => {
     resultsTitle.textContent = "Results";
     feedback.textContent = `Error fetching news: ${error.message}`;
   } finally {
-    fetchBtn.disabled = false;
+    syncFetchButtonState();
   }
 });
