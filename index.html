@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediaMine</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>📰 MediaMine</h1>
+      <p class="subtitle">Top News Headlines by State</p>
+
+      <section class="card">
+        <label for="apiKey">NewsAPI Key</label>
+        <input
+          id="apiKey"
+          type="password"
+          placeholder="Enter your NewsAPI key"
+          autocomplete="off"
+        />
+        <small>
+          Tip: Get a free key at
+          <a href="https://newsapi.org/" target="_blank" rel="noreferrer">newsapi.org</a>
+        </small>
+      </section>
+
+      <section class="card">
+        <label for="stateInput">State *</label>
+        <input
+          id="stateInput"
+          type="text"
+          placeholder="e.g., Cal, New, Tex"
+          autocomplete="off"
+        />
+        <small>Type at least 3 characters to see matching states.</small>
+
+        <div id="feedback" class="feedback" aria-live="polite"></div>
+
+        <label for="stateSelect" class="hidden" id="stateSelectLabel">Select a state</label>
+        <select id="stateSelect" class="hidden"></select>
+
+        <button id="fetchBtn" disabled>Get News Headlines</button>
+      </section>
+
+      <section class="card">
+        <h2 id="resultsTitle">Results</h2>
+        <div id="results" class="results"></div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
