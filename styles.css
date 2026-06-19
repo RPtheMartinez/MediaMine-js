@@ -1,0 +1,98 @@
+:root {
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #111827;
+  background: #f3f4f6;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2rem 1rem;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+h1 {
+  margin: 0;
+}
+
+.subtitle {
+  margin-top: 0.25rem;
+  color: #4b5563;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+input,
+select,
+button {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+input,
+select {
+  margin-bottom: 0.5rem;
+}
+
+button {
+  margin-top: 0.25rem;
+  background: #2563eb;
+  color: white;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+small {
+  color: #6b7280;
+}
+
+.feedback {
+  min-height: 1.5rem;
+  margin: 0.5rem 0;
+  color: #374151;
+}
+
+.hidden {
+  display: none;
+}
+
+.results ol {
+  padding-left: 1.25rem;
+}
+
+.results a {
+  color: #1d4ed8;
+  text-decoration: none;
+}
+
+.results a:hover {
+  text-decoration: underline;
+}
