@@ -131,11 +131,17 @@ function renderHeadlines(state, articles) {
   }
 
   const listItems = articles
-    .slice(0, 5)
+    .slice(0, 8)
     .map((article) => {
       const title = article.title || "No title";
       const url = article.url || "#";
-      return `<li><a href="${url}" target="_blank" rel="noreferrer">${title}</a></li>`;
+      const source = article.source && article.source.name ? article.source.name : "Unknown";
+      return `
+        <li>
+          <a href="${url}" target="_blank" rel="noreferrer">${title}</a>
+          <div class="article-source">Source: ${source}</div>
+        </li>
+      `;
     })
     .join("");
 

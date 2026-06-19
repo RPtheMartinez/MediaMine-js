@@ -112,6 +112,16 @@ small {
   padding-left: 1.25rem;
 }
 
+.results li {
+  margin-bottom: 1rem;
+}
+
+.article-source {
+  margin-top: 0.25rem;
+  color: #6b7280;
+  font-size: 0.92rem;
+}
+
 .results a {
   color: #1d4ed8;
   text-decoration: none;
