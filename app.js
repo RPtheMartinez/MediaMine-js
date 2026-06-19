@@ -73,22 +73,26 @@ function renderHeadlines(state, articles) {
 }
 
 async function fetchNews(state, apiKey) {
-  const endpoint = "https://newsapi.org/v2/everything";
-  const params = new URLSearchParams({
-    q: state,
-    language: "en",
-    sortBy: "publishedAt",
-    pageSize: "5",
-    apiKey
+  const params = new URLSearchParams({ state });
+  const response = await fetch(`/api/news?${params.toString()}`, {
+    headers: {
+      "x-api-key": apiKey
+    }
   });
 
-  const response = await fetch(`${endpoint}?${params.toString()}`);
-
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}`);
+  let payload = null;
+  try {
+    payload = await response.json();
+  } catch {
+    payload = null;
   }
 
-  const data = await response.json();
+  if (!response.ok) {
+    const apiMessage = payload && payload.message ? payload.message : null;
+    throw new Error(apiMessage || `HTTP ${response.status}`);
+  }
+
+  const data = payload;
 
   if (data.status !== "ok") {
     throw new Error(data.message || "Unknown API error");
