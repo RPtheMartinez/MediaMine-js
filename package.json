@@ -1,0 +1,24 @@
+{
+  "name": "mediamine",
+  "version": "1.0.0",
+  "description": "A plain JavaScript app that shows top news headlines by U.S. state.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/RPtheMartinez/MediaMine-js.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/RPtheMartinez/MediaMine-js/issues"
+  },
+  "homepage": "https://github.com/RPtheMartinez/MediaMine-js#readme",
+  "devDependencies": {
+    "playwright": "^1.61.0"
+  }
+}
