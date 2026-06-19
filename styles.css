@@ -20,11 +20,18 @@ body {
 
 h1 {
   margin: 0;
+  font-size: 3rem;
+  font-weight: 700;
+  font-family: "Courier New", Courier, monospace;
+  text-align: center;
+  -webkit-text-stroke: 1px #9ca3af;
+  paint-order: stroke fill;
 }
 
 .subtitle {
   margin-top: 0.25rem;
   color: #4b5563;
+  text-align: center;
 }
 
 .card {
