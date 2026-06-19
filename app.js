@@ -11,6 +11,59 @@ const US_STATES = [
   "West Virginia", "Wisconsin", "Wyoming"
 ];
 
+const STATE_ABBREVIATIONS = {
+  AL: "Alabama",
+  AK: "Alaska",
+  AZ: "Arizona",
+  AR: "Arkansas",
+  CA: "California",
+  CO: "Colorado",
+  CT: "Connecticut",
+  DE: "Delaware",
+  FL: "Florida",
+  GA: "Georgia",
+  HI: "Hawaii",
+  ID: "Idaho",
+  IL: "Illinois",
+  IN: "Indiana",
+  IA: "Iowa",
+  KS: "Kansas",
+  KY: "Kentucky",
+  LA: "Louisiana",
+  ME: "Maine",
+  MD: "Maryland",
+  MA: "Massachusetts",
+  MI: "Michigan",
+  MN: "Minnesota",
+  MS: "Mississippi",
+  MO: "Missouri",
+  MT: "Montana",
+  NE: "Nebraska",
+  NV: "Nevada",
+  NH: "New Hampshire",
+  NJ: "New Jersey",
+  NM: "New Mexico",
+  NY: "New York",
+  NC: "North Carolina",
+  ND: "North Dakota",
+  OH: "Ohio",
+  OK: "Oklahoma",
+  OR: "Oregon",
+  PA: "Pennsylvania",
+  RI: "Rhode Island",
+  SC: "South Carolina",
+  SD: "South Dakota",
+  TN: "Tennessee",
+  TX: "Texas",
+  UT: "Utah",
+  VT: "Vermont",
+  VA: "Virginia",
+  WA: "Washington",
+  WV: "West Virginia",
+  WI: "Wisconsin",
+  WY: "Wyoming"
+};
+
 const stateInput = document.getElementById("stateInput");
 const stateSuggestions = document.getElementById("stateSuggestions");
 const fetchBtn = document.getElementById("fetchBtn");
@@ -21,15 +74,36 @@ const apiKeyInput = document.getElementById("apiKey");
 const toggleApiKeyBtn = document.getElementById("toggleApiKey");
 
 function filterStates(query) {
-  if (!query || query.length < 3) return [];
-  const q = query.toLowerCase();
-  return US_STATES.filter((state) => state.toLowerCase().includes(q));
+  if (!query) return [];
+  const q = query.trim().toLowerCase();
+  if (!q) return [];
+
+  const matches = [];
+  const abbreviation = query.trim().toUpperCase();
+  if (abbreviation.length === 2 && STATE_ABBREVIATIONS[abbreviation]) {
+    matches.push(STATE_ABBREVIATIONS[abbreviation]);
+  }
+
+  US_STATES.forEach((state) => {
+    if (state.toLowerCase().includes(q) && !matches.includes(state)) {
+      matches.push(state);
+    }
+  });
+
+  return matches;
 }
 
 function resolveState(value) {
-  const normalized = value.trim().toLowerCase();
+  const normalized = value.trim();
   if (!normalized) return "";
-  const match = US_STATES.find((state) => state.toLowerCase() === normalized);
+
+  const abbreviation = normalized.toUpperCase();
+  if (abbreviation.length === 2 && STATE_ABBREVIATIONS[abbreviation]) {
+    return STATE_ABBREVIATIONS[abbreviation];
+  }
+
+  const stateName = normalized.toLowerCase();
+  const match = US_STATES.find((state) => state.toLowerCase() === stateName);
   return match || "";
 }
 
@@ -102,8 +176,8 @@ stateInput.addEventListener("input", () => {
   results.innerHTML = "";
   resultsTitle.textContent = "Results";
 
-  if (value.length < 3) {
-    feedback.textContent = "Type at least 3 characters.";
+  if (value.length < 2) {
+    feedback.textContent = "Type at least 2 characters or a 2-letter state abbreviation.";
     renderSuggestions([]);
     syncFetchButtonState();
     return;
@@ -121,11 +195,22 @@ stateInput.addEventListener("input", () => {
   const selectedState = resolveState(value);
   if (selectedState) {
     feedback.textContent = `Ready to fetch headlines for ${selectedState}.`;
-    stateInput.value = selectedState;
   } else {
     feedback.textContent = `Found ${matches.length} matching state(s). Keep typing or pick a suggestion.`;
   }
 
+  syncFetchButtonState();
+});
+
+stateInput.addEventListener("keydown", (event) => {
+  if (event.key !== "Enter") return;
+
+  const selectedState = resolveState(stateInput.value);
+  if (!selectedState) return;
+
+  event.preventDefault();
+  stateInput.value = selectedState;
+  feedback.textContent = `Selected ${selectedState}.`;
   syncFetchButtonState();
 });
 
