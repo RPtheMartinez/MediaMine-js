@@ -1,8 +1,11 @@
 const express = require("express");
 const path = require("path");
+require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5500;
+const supabaseUrl = (process.env.SUPABASE_URL || "").trim();
+const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || "").trim();
 
 const SUPPORTED_FORMATS = new Set(["print", "video", "mix"]);
 const STATE_CODE_BY_NAME = {
@@ -172,6 +175,13 @@ function buildQueryForFormat(state, format) {
 }
 
 app.use(express.static(path.join(__dirname)));
+
+app.get("/api/config", (_req, res) => {
+  return res.status(200).json({
+    supabaseUrl,
+    supabaseAnonKey
+  });
+});
 
 app.get("/api/news", async (req, res) => {
   const state = (req.query.state || "").trim();

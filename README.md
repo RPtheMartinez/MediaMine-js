@@ -17,12 +17,17 @@ A plain JavaScript app that shows top news headlines by U.S. state.
 	```bash
 	npm install
 	```
-3. Start the local server:
+3. Create local environment file:
+	```bash
+	cp .env.example .env
+	```
+4. Fill in `SUPABASE_URL` and `SUPABASE_ANON_KEY` in `.env`
+5. Start the local server:
 	```bash
 	npm run dev
 	```
-4. Open http://localhost:5500 in your browser
-5. Add your NewsAPI key directly in the app input field
+6. Open http://localhost:5500 in your browser
+7. Add your NewsAPI key directly in the app input field
 
 > Note: In this plain frontend version, your API key is used in the browser.
 > For production use, move the API call behind a backend proxy.
@@ -46,6 +51,8 @@ A plain JavaScript app that shows top news headlines by U.S. state.
 	```
 
 For API relevance tests in `tests/state-relevance.spec.js`, set `NEWS_API_KEY` (or `NEWSAPI_KEY`) before running tests.
+
+The backend exposes safe client config at `GET /api/config` and returns only `supabaseUrl` and `supabaseAnonKey`.
 
 ## Edge cases covered
 
