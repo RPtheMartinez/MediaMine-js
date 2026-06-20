@@ -1,8 +1,34 @@
 const signupForm = document.getElementById("signupForm");
 const signupFeedback = document.getElementById("signupFeedback");
 const signupBtn = document.getElementById("signupBtn");
+const passwordInput = document.getElementById("password");
+const confirmPasswordInput = document.getElementById("confirmPassword");
 const passwordToggles = Array.from(document.querySelectorAll("[data-password-toggle]"));
 const SESSION_USER_KEY = "mediamine.session.user";
+
+function validatePasswordMatch() {
+  const password = String(passwordInput.value || "");
+  const confirmPassword = String(confirmPasswordInput.value || "");
+
+  if (!confirmPassword) {
+    confirmPasswordInput.classList.remove("input-error");
+    if (signupFeedback.textContent === "Passwords do not match.") {
+      setSignupFeedback("", null);
+    }
+    return true;
+  }
+
+  const matches = password === confirmPassword;
+  confirmPasswordInput.classList.toggle("input-error", !matches);
+
+  if (!matches) {
+    setSignupFeedback("Passwords do not match.", "error");
+  } else if (signupFeedback.textContent === "Passwords do not match.") {
+    setSignupFeedback("", null);
+  }
+
+  return matches;
+}
 
 passwordToggles.forEach((toggleBtn) => {
   toggleBtn.addEventListener("click", () => {
@@ -16,6 +42,9 @@ passwordToggles.forEach((toggleBtn) => {
     toggleBtn.setAttribute("aria-pressed", String(shouldShow));
   });
 });
+
+passwordInput.addEventListener("input", validatePasswordMatch);
+confirmPasswordInput.addEventListener("input", validatePasswordMatch);
 
 function setSignupFeedback(message, status) {
   signupFeedback.textContent = message;
@@ -75,6 +104,7 @@ signupForm.addEventListener("submit", async (event) => {
   }
 
   if (password !== confirmPassword) {
+    validatePasswordMatch();
     setSignupFeedback("Passwords do not match.", "error");
     return;
   }
