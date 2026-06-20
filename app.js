@@ -73,6 +73,23 @@ const results = document.getElementById("results");
 const apiKeyInput = document.getElementById("apiKey");
 const toggleApiKeyBtn = document.getElementById("toggleApiKey");
 
+function ensureStateInputIsEditable({ focus = false, selectAll = false } = {}) {
+  if (stateInput.type !== "text") {
+    stateInput.type = "text";
+  }
+
+  stateInput.readOnly = false;
+  stateInput.disabled = false;
+
+  if (focus || selectAll) {
+    stateInput.focus();
+  }
+
+  if (selectAll) {
+    stateInput.select();
+  }
+}
+
 function filterStates(query) {
   if (!query) return [];
   const q = query.trim().toLowerCase();
@@ -217,6 +234,7 @@ stateInput.addEventListener("keydown", (event) => {
   event.preventDefault();
   stateInput.value = selectedState;
   feedback.textContent = `Selected ${selectedState}.`;
+  ensureStateInputIsEditable({ focus: true });
   syncFetchButtonState();
 });
 
@@ -255,6 +273,8 @@ fetchBtn.addEventListener("click", async () => {
     resultsTitle.textContent = "Results";
     feedback.textContent = `Error fetching news: ${error.message}`;
   } finally {
+    // Keep state entry ready so the user can immediately search a different state.
+    ensureStateInputIsEditable({ selectAll: true });
     syncFetchButtonState();
   }
 });
