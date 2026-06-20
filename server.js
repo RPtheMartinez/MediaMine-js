@@ -34,6 +34,10 @@ function isVideoArticle(article) {
   return looksLikeVideoHost || looksLikeVideoText;
 }
 
+function getArticleFormatLabel(article) {
+  return isVideoArticle(article) ? "VIDEO" : "PRINT";
+}
+
 function interleaveArticles(first, second, limit) {
   const merged = [];
   let i = 0;
@@ -139,7 +143,12 @@ app.get("/api/news", async (req, res) => {
     }
 
     const articles = Array.isArray(data.articles) ? data.articles : [];
-    const filteredArticles = filterArticlesByFormat(articles, format).slice(0, 12);
+    const filteredArticles = filterArticlesByFormat(articles, format)
+      .slice(0, 12)
+      .map((article) => ({
+        ...article,
+        mediaFormat: getArticleFormatLabel(article)
+      }));
     return res.status(200).json({
       ...data,
       articles: filteredArticles,

@@ -187,10 +187,11 @@ function renderHeadlines(state, articles) {
       const title = article.title || "No title";
       const url = article.url || "#";
       const source = article.source && article.source.name ? article.source.name : "Unknown";
+      const formatLabel = article.mediaFormat === "VIDEO" ? "VIDEO" : "PRINT";
       return `
         <li>
           <a href="${url}" target="_blank" rel="noreferrer">${title}</a>
-          <div class="article-source">Source: ${source}</div>
+          <div class="article-source">Source: ${source} (${formatLabel})</div>
         </li>
       `;
     })
