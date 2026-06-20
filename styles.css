@@ -111,6 +111,42 @@ small {
   color: #374151;
 }
 
+.source-format {
+  margin-top: 0.75rem;
+}
+
+.source-format-label {
+  margin: 0 0 0.4rem;
+  color: #374151;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.format-button-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.format-button {
+  margin-top: 0;
+  background: #d1d5db;
+  color: #374151;
+  border: 1px solid #9ca3af;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.format-button[aria-pressed="true"] {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
+.format-button[aria-pressed="false"] {
+  opacity: 0.72;
+}
+
 .hidden {
   display: none;
 }

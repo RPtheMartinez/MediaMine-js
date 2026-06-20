@@ -40,6 +40,15 @@
         <datalist id="stateSuggestions"></datalist>
         <small>Type a name fragment or 2-letter abbreviation (e.g., CA, NY), then press Enter to apply.</small>
 
+        <div class="source-format">
+          <p class="source-format-label">Story Format</p>
+          <div class="format-button-row" role="group" aria-label="Choose story format">
+            <button type="button" class="format-button" data-format-button data-format="print" aria-pressed="false">PRINT</button>
+            <button type="button" class="format-button" data-format-button data-format="video" aria-pressed="false">VIDEO</button>
+            <button type="button" class="format-button" data-format-button data-format="mix" aria-pressed="true">MIX</button>
+          </div>
+        </div>
+
         <div id="feedback" class="feedback" aria-live="polite"></div>
 
         <button id="fetchBtn" disabled>Get News Headlines</button>

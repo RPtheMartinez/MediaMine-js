@@ -72,6 +72,10 @@ const resultsTitle = document.getElementById("resultsTitle");
 const results = document.getElementById("results");
 const apiKeyInput = document.getElementById("apiKey");
 const toggleApiKeyBtn = document.getElementById("toggleApiKey");
+const formatButtons = Array.from(document.querySelectorAll("[data-format-button]"));
+
+const SUPPORTED_FORMATS = new Set(["print", "video", "mix"]);
+let selectedFormat = "mix";
 
 function ensureStateInputIsEditable({ focus = false, selectAll = false } = {}) {
   if (stateInput.type !== "text") {
@@ -141,7 +145,32 @@ function renderSuggestions(matches) {
 function syncFetchButtonState() {
   const selectedState = resolveState(stateInput.value);
   const apiKey = apiKeyInput.value.trim();
-  fetchBtn.disabled = !selectedState || !apiKey;
+  fetchBtn.disabled = !selectedState || !apiKey || !SUPPORTED_FORMATS.has(selectedFormat);
+}
+
+function syncFormatButtonStates() {
+  formatButtons.forEach((button) => {
+    const isSelected = button.dataset.format === selectedFormat;
+    button.setAttribute("aria-pressed", String(isSelected));
+  });
+}
+
+function setSelectedFormat(format) {
+  if (!SUPPORTED_FORMATS.has(format)) return;
+  selectedFormat = format;
+  syncFormatButtonStates();
+
+  const selectedState = resolveState(stateInput.value);
+  const apiKey = apiKeyInput.value.trim();
+  if (selectedState) {
+    feedback.textContent = `Ready to fetch ${selectedFormat.toUpperCase()} stories for ${selectedState}.`;
+  }
+
+  if (selectedState && apiKey) {
+    fetchAndRenderNews(selectedState, apiKey);
+  }
+
+  syncFetchButtonState();
 }
 
 function renderHeadlines(state, articles) {
@@ -170,8 +199,8 @@ function renderHeadlines(state, articles) {
   results.innerHTML = `<ol>${listItems}</ol>`;
 }
 
-async function fetchNews(state, apiKey) {
-  const params = new URLSearchParams({ state });
+async function fetchNews(state, apiKey, format) {
+  const params = new URLSearchParams({ state, format });
   const response = await fetch(`/api/news?${params.toString()}`, {
     headers: {
       "x-api-key": apiKey
@@ -203,6 +232,25 @@ async function fetchNews(state, apiKey) {
   return data.articles || [];
 }
 
+async function fetchAndRenderNews(selectedState, apiKey) {
+  feedback.textContent = `Fetching ${selectedFormat.toUpperCase()} stories for ${selectedState}...`;
+  fetchBtn.disabled = true;
+
+  try {
+    const articles = await fetchNews(selectedState, apiKey, selectedFormat);
+    renderHeadlines(selectedState, articles);
+    feedback.textContent = `Done. Showing ${selectedFormat.toUpperCase()} stories.`;
+  } catch (error) {
+    results.innerHTML = "";
+    resultsTitle.textContent = "Results";
+    feedback.textContent = `Error fetching news: ${error.message}`;
+  } finally {
+    // Keep state entry ready so the user can immediately search a different state.
+    ensureStateInputIsEditable({ selectAll: true });
+    syncFetchButtonState();
+  }
+}
+
 stateInput.addEventListener("input", () => {
   const value = stateInput.value.trim();
   results.innerHTML = "";
@@ -226,7 +274,7 @@ stateInput.addEventListener("input", () => {
 
   const selectedState = resolveState(value);
   if (selectedState) {
-    feedback.textContent = `Ready to fetch headlines for ${selectedState}.`;
+    feedback.textContent = `Ready to fetch ${selectedFormat.toUpperCase()} stories for ${selectedState}.`;
   } else {
     feedback.textContent = `Found ${matches.length} matching state(s). Keep typing or pick a suggestion.`;
   }
@@ -242,9 +290,15 @@ stateInput.addEventListener("keydown", (event) => {
 
   event.preventDefault();
   stateInput.value = selectedState;
-  feedback.textContent = `Selected ${selectedState}.`;
+  feedback.textContent = `Selected ${selectedState}. Format: ${selectedFormat.toUpperCase()}.`;
   ensureStateInputIsEditable({ focus: true });
   syncFetchButtonState();
+});
+
+formatButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    setSelectedFormat(button.dataset.format || "");
+  });
 });
 
 apiKeyInput.addEventListener("input", syncFetchButtonState);
@@ -270,20 +324,8 @@ fetchBtn.addEventListener("click", async () => {
     return;
   }
 
-  feedback.textContent = `Fetching headlines for ${selectedState}...`;
-  fetchBtn.disabled = true;
-
-  try {
-    const articles = await fetchNews(selectedState, apiKey);
-    renderHeadlines(selectedState, articles);
-    feedback.textContent = "Done.";
-  } catch (error) {
-    results.innerHTML = "";
-    resultsTitle.textContent = "Results";
-    feedback.textContent = `Error fetching news: ${error.message}`;
-  } finally {
-    // Keep state entry ready so the user can immediately search a different state.
-    ensureStateInputIsEditable({ selectAll: true });
-    syncFetchButtonState();
-  }
+  await fetchAndRenderNews(selectedState, apiKey);
 });
+
+syncFormatButtonStates();
+syncFetchButtonState();
