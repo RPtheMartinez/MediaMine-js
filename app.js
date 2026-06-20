@@ -92,18 +92,23 @@ function ensureStateInputIsEditable({ focus = false, selectAll = false } = {}) {
 
 function filterStates(query) {
   if (!query) return [];
-  const q = query.trim().toLowerCase();
+  const normalized = query.trim();
+  const q = normalized.toLowerCase();
   if (!q) return [];
 
   const matches = [];
-  const abbreviation = query.trim().toUpperCase();
+  const seen = new Set();
+  const abbreviation = normalized.toUpperCase();
   if (abbreviation.length === 2 && STATE_ABBREVIATIONS[abbreviation]) {
-    matches.push(STATE_ABBREVIATIONS[abbreviation]);
+    const abbreviationMatch = STATE_ABBREVIATIONS[abbreviation];
+    matches.push(abbreviationMatch);
+    seen.add(abbreviationMatch);
   }
 
   US_STATES.forEach((state) => {
-    if (state.toLowerCase().includes(q) && !matches.includes(state)) {
+    if (state.toLowerCase().includes(q) && !seen.has(state)) {
       matches.push(state);
+      seen.add(state);
     }
   });
 
@@ -183,6 +188,10 @@ async function fetchNews(state, apiKey) {
   if (!response.ok) {
     const apiMessage = payload && payload.message ? payload.message : null;
     throw new Error(apiMessage || `HTTP ${response.status}`);
+  }
+
+  if (!payload || typeof payload !== "object") {
+    throw new Error("Unexpected response format from the news provider.");
   }
 
   const data = payload;
