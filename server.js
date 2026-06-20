@@ -5,6 +5,58 @@ const app = express();
 const PORT = process.env.PORT || 5500;
 
 const SUPPORTED_FORMATS = new Set(["print", "video", "mix"]);
+const STATE_CODE_BY_NAME = {
+  Alabama: "AL",
+  Alaska: "AK",
+  Arizona: "AZ",
+  Arkansas: "AR",
+  California: "CA",
+  Colorado: "CO",
+  Connecticut: "CT",
+  Delaware: "DE",
+  Florida: "FL",
+  Georgia: "GA",
+  Hawaii: "HI",
+  Idaho: "ID",
+  Illinois: "IL",
+  Indiana: "IN",
+  Iowa: "IA",
+  Kansas: "KS",
+  Kentucky: "KY",
+  Louisiana: "LA",
+  Maine: "ME",
+  Maryland: "MD",
+  Massachusetts: "MA",
+  Michigan: "MI",
+  Minnesota: "MN",
+  Mississippi: "MS",
+  Missouri: "MO",
+  Montana: "MT",
+  Nebraska: "NE",
+  Nevada: "NV",
+  "New Hampshire": "NH",
+  "New Jersey": "NJ",
+  "New Mexico": "NM",
+  "New York": "NY",
+  "North Carolina": "NC",
+  "North Dakota": "ND",
+  Ohio: "OH",
+  Oklahoma: "OK",
+  Oregon: "OR",
+  Pennsylvania: "PA",
+  "Rhode Island": "RI",
+  "South Carolina": "SC",
+  "South Dakota": "SD",
+  Tennessee: "TN",
+  Texas: "TX",
+  Utah: "UT",
+  Vermont: "VT",
+  Virginia: "VA",
+  Washington: "WA",
+  "West Virginia": "WV",
+  Wisconsin: "WI",
+  Wyoming: "WY"
+};
 const VIDEO_HOSTS = [
   "youtube.com",
   "youtu.be",
@@ -36,6 +88,36 @@ function isVideoArticle(article) {
 
 function getArticleFormatLabel(article) {
   return isVideoArticle(article) ? "VIDEO" : "PRINT";
+}
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function isStateRelevantArticle(article, state) {
+  const normalizedState = state.trim();
+  if (!normalizedState) return false;
+
+  const stateCode = STATE_CODE_BY_NAME[normalizedState] || "";
+  const textBlob = [
+    article && article.title ? article.title : "",
+    article && article.description ? article.description : "",
+    article && article.content ? article.content : "",
+    article && article.url ? article.url : "",
+    article && article.source && article.source.name ? article.source.name : ""
+  ].join(" ");
+
+  const fullStateRegex = new RegExp(`\\b${escapeRegExp(normalizedState)}\\b`, "i");
+  if (fullStateRegex.test(textBlob)) {
+    return true;
+  }
+
+  if (!stateCode) {
+    return false;
+  }
+
+  const codeRegex = new RegExp(`\\b${escapeRegExp(stateCode)}\\b`, "i");
+  return codeRegex.test(textBlob);
 }
 
 function interleaveArticles(first, second, limit) {
@@ -76,15 +158,17 @@ function filterArticlesByFormat(articles, format) {
 }
 
 function buildQueryForFormat(state, format) {
+  const quotedState = `"${state}"`;
+
   if (format === "video") {
-    return `${state} (video OR watch OR livestream OR interview)`;
+    return `${quotedState} (video OR watch OR livestream OR interview)`;
   }
 
   if (format === "print") {
-    return `${state} news`;
+    return `${quotedState} news`;
   }
 
-  return `${state} (news OR video)`;
+  return `${quotedState} (news OR video)`;
 }
 
 app.use(express.static(path.join(__dirname)));
@@ -143,11 +227,13 @@ app.get("/api/news", async (req, res) => {
     }
 
     const articles = Array.isArray(data.articles) ? data.articles : [];
-    const filteredArticles = filterArticlesByFormat(articles, format)
+    const stateMatchedArticles = articles.filter((article) => isStateRelevantArticle(article, state));
+    const filteredArticles = filterArticlesByFormat(stateMatchedArticles, format)
       .slice(0, 12)
       .map((article) => ({
         ...article,
-        mediaFormat: getArticleFormatLabel(article)
+        mediaFormat: getArticleFormatLabel(article),
+        stateMatch: true
       }));
     return res.status(200).json({
       ...data,
