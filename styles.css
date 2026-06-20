@@ -117,7 +117,17 @@ select {
   align-items: center;
 }
 
+.password-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
 .api-key-row input {
+  margin-bottom: 0;
+}
+
+.password-row input {
   margin-bottom: 0;
 }
 
@@ -132,6 +142,20 @@ select {
 }
 
 .api-key-toggle:hover {
+  background: #d1d5db;
+}
+
+.password-toggle {
+  width: auto;
+  margin-top: 0;
+  background: #e5e7eb;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.password-toggle:hover {
   background: #d1d5db;
 }
 

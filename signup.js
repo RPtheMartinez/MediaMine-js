@@ -1,7 +1,21 @@
 const signupForm = document.getElementById("signupForm");
 const signupFeedback = document.getElementById("signupFeedback");
 const signupBtn = document.getElementById("signupBtn");
+const passwordToggles = Array.from(document.querySelectorAll("[data-password-toggle]"));
 const SESSION_USER_KEY = "mediamine.session.user";
+
+passwordToggles.forEach((toggleBtn) => {
+  toggleBtn.addEventListener("click", () => {
+    const inputId = toggleBtn.dataset.targetInput || "";
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const shouldShow = input.type === "password";
+    input.type = shouldShow ? "text" : "password";
+    toggleBtn.textContent = shouldShow ? "Hide" : "Show";
+    toggleBtn.setAttribute("aria-pressed", String(shouldShow));
+  });
+});
 
 function setSignupFeedback(message, status) {
   signupFeedback.textContent = message;

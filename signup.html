@@ -36,10 +36,32 @@
           <input id="state" name="state" type="text" placeholder="Optional" autocomplete="address-level1" />
 
           <label for="password">Password *</label>
-          <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required />
+          <div class="password-row">
+            <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required />
+            <button
+              type="button"
+              class="password-toggle"
+              data-password-toggle
+              data-target-input="password"
+              aria-pressed="false"
+            >
+              Show
+            </button>
+          </div>
 
           <label for="confirmPassword">Confirm Password *</label>
-          <input id="confirmPassword" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required />
+          <div class="password-row">
+            <input id="confirmPassword" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required />
+            <button
+              type="button"
+              class="password-toggle"
+              data-password-toggle
+              data-target-input="confirmPassword"
+              aria-pressed="false"
+            >
+              Show
+            </button>
+          </div>
 
           <div id="signupFeedback" class="feedback" aria-live="polite"></div>
 
