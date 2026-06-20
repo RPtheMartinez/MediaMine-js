@@ -12,6 +12,28 @@ function hasSupabaseConfig() {
   return Boolean(supabaseUrl && supabaseAnonKey);
 }
 
+function hasPlaceholderSupabaseConfig() {
+  const lowerUrl = supabaseUrl.toLowerCase();
+  const lowerKey = supabaseAnonKey.toLowerCase();
+
+  return (
+    lowerUrl.includes("your-project-ref") ||
+    lowerKey.includes("your_supabase_anon_key")
+  );
+}
+
+function getSupabaseConfigErrorMessage() {
+  if (!hasSupabaseConfig()) {
+    return "Supabase is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env.";
+  }
+
+  if (hasPlaceholderSupabaseConfig()) {
+    return "Supabase credentials in .env are placeholders. Replace SUPABASE_URL and SUPABASE_ANON_KEY with real values from your Supabase project settings.";
+  }
+
+  return "";
+}
+
 function createSupabaseAnonClient() {
   if (!hasSupabaseConfig()) return null;
   return createClient(supabaseUrl, supabaseAnonKey, {
@@ -215,10 +237,11 @@ app.get("/api/config", (_req, res) => {
 });
 
 app.post("/api/signup", async (req, res) => {
-  if (!hasSupabaseConfig()) {
+  const configError = getSupabaseConfigErrorMessage();
+  if (configError) {
     return res.status(500).json({
       status: "error",
-      message: "Supabase is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env."
+      message: configError
     });
   }
 
@@ -244,17 +267,25 @@ app.post("/api/signup", async (req, res) => {
     });
   }
 
-  const signup = await supabaseClient.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        first_name: firstName,
-        last_name: lastName,
-        state
+  let signup;
+  try {
+    signup = await supabaseClient.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          state
+        }
       }
-    }
-  });
+    });
+  } catch {
+    return res.status(502).json({
+      status: "error",
+      message: "Could not reach Supabase. Check SUPABASE_URL and SUPABASE_ANON_KEY in .env and try again."
+    });
+  }
 
   if (signup.error) {
     return res.status(400).json({
@@ -306,10 +337,11 @@ app.post("/api/signup", async (req, res) => {
 });
 
 app.post("/api/login", async (req, res) => {
-  if (!hasSupabaseConfig()) {
+  const configError = getSupabaseConfigErrorMessage();
+  if (configError) {
     return res.status(500).json({
       status: "error",
-      message: "Supabase is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env."
+      message: configError
     });
   }
 
@@ -324,7 +356,15 @@ app.post("/api/login", async (req, res) => {
     });
   }
 
-  const login = await supabaseClient.auth.signInWithPassword({ email, password });
+  let login;
+  try {
+    login = await supabaseClient.auth.signInWithPassword({ email, password });
+  } catch {
+    return res.status(502).json({
+      status: "error",
+      message: "Could not reach Supabase. Check SUPABASE_URL and SUPABASE_ANON_KEY in .env and try again."
+    });
+  }
   if (login.error) {
     return res.status(401).json({
       status: "error",
