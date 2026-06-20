@@ -77,9 +77,47 @@ const authStatus = document.getElementById("authStatus");
 const logoutBtn = document.getElementById("logoutBtn");
 
 const SESSION_USER_KEY = "mediamine.session.user";
+const NEWS_API_KEY_PATTERN = /^[a-f0-9]{32}$/i;
 
 const SUPPORTED_FORMATS = new Set(["print", "video", "mix"]);
 let selectedFormat = "mix";
+let hasBlurredApiKey = false;
+
+function isLikelyNewsApiKey(value) {
+  return NEWS_API_KEY_PATTERN.test(value.trim());
+}
+
+function validateApiKeyField({ showFeedback = false } = {}) {
+  const apiKey = apiKeyInput.value.trim();
+
+  if (!apiKey) {
+    if (hasBlurredApiKey || showFeedback) {
+      apiKeyInput.classList.remove("input-error");
+    }
+
+    if (showFeedback) {
+      feedback.textContent = "Please enter your NewsAPI key.";
+    }
+
+    return false;
+  }
+
+  const isValid = isLikelyNewsApiKey(apiKey);
+
+  if (hasBlurredApiKey || showFeedback) {
+    apiKeyInput.classList.toggle("input-error", !isValid);
+  }
+
+  if (showFeedback) {
+    if (!isValid) {
+      feedback.textContent = "NewsAPI key looks invalid. It should be 32 hexadecimal characters.";
+    } else if (feedback.textContent.startsWith("NewsAPI key looks invalid.")) {
+      feedback.textContent = "";
+    }
+  }
+
+  return isValid;
+}
 
 function getSessionUser() {
   const raw = sessionStorage.getItem(SESSION_USER_KEY);
@@ -179,8 +217,8 @@ function renderSuggestions(matches) {
 
 function syncFetchButtonState() {
   const selectedState = resolveState(stateInput.value);
-  const apiKey = apiKeyInput.value.trim();
-  fetchBtn.disabled = !selectedState || !apiKey || !SUPPORTED_FORMATS.has(selectedFormat);
+  const hasValidApiKey = validateApiKeyField();
+  fetchBtn.disabled = !selectedState || !hasValidApiKey || !SUPPORTED_FORMATS.has(selectedFormat);
 }
 
 function syncFormatButtonStates() {
@@ -197,11 +235,12 @@ function setSelectedFormat(format) {
 
   const selectedState = resolveState(stateInput.value);
   const apiKey = apiKeyInput.value.trim();
+  const hasValidApiKey = isLikelyNewsApiKey(apiKey);
   if (selectedState) {
     feedback.textContent = `Ready to fetch ${selectedFormat.toUpperCase()} stories for ${selectedState}.`;
   }
 
-  if (selectedState && apiKey) {
+  if (selectedState && hasValidApiKey) {
     fetchAndRenderNews(selectedState, apiKey);
   }
 
@@ -337,7 +376,19 @@ formatButtons.forEach((button) => {
   });
 });
 
-apiKeyInput.addEventListener("input", syncFetchButtonState);
+apiKeyInput.addEventListener("input", () => {
+  if (hasBlurredApiKey) {
+    validateApiKeyField({ showFeedback: true });
+  }
+
+  syncFetchButtonState();
+});
+
+apiKeyInput.addEventListener("blur", () => {
+  hasBlurredApiKey = true;
+  validateApiKeyField({ showFeedback: true });
+  syncFetchButtonState();
+});
 
 toggleApiKeyBtn.addEventListener("click", () => {
   const shouldShow = apiKeyInput.type === "password";
@@ -355,8 +406,7 @@ fetchBtn.addEventListener("click", async () => {
     return;
   }
 
-  if (!apiKey) {
-    feedback.textContent = "Please enter your NewsAPI key.";
+  if (!validateApiKeyField({ showFeedback: true })) {
     return;
   }
 
