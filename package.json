@@ -4,7 +4,11 @@
   "description": "A plain JavaScript app that shows top news headlines by U.S. state.",
   "main": "app.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed"
   },
   "repository": {
     "type": "git",

@@ -13,8 +13,16 @@ A plain JavaScript app that shows top news headlines by U.S. state.
 ## Setup
 
 1. Clone this repo
-2. Open `index.html` in your browser
-3. Add your NewsAPI key directly in the app input field
+2. Install dependencies:
+	```bash
+	npm install
+	```
+3. Start the local server:
+	```bash
+	npm run dev
+	```
+4. Open http://localhost:5500 in your browser
+5. Add your NewsAPI key directly in the app input field
 
 > Note: In this plain frontend version, your API key is used in the browser.
 > For production use, move the API call behind a backend proxy.
@@ -25,6 +33,19 @@ A plain JavaScript app that shows top news headlines by U.S. state.
 2. Pick a state from the dropdown.
 3. Enter your NewsAPI key.
 4. Click **Get News Headlines**.
+
+## Local Testing
+
+- Run end-to-end tests:
+	```bash
+	npm run test:e2e
+	```
+- Run tests with UI mode:
+	```bash
+	npm run test:e2e:ui
+	```
+
+For API relevance tests in `tests/state-relevance.spec.js`, set `NEWS_API_KEY` (or `NEWSAPI_KEY`) before running tests.
 
 ## Edge cases covered
 
