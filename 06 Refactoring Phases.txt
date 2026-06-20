@@ -1,0 +1,30 @@
+06/26: Refactoring Phases
+Project: MediaMine-js
+
+Date Created: 2026-06-20
+
+Phase 1 (Safe Refactor, P0)
+- Slice 1: Extract shared frontend auth helpers and add brief intent comments at policy points.
+  Status: COMPLETED
+  Completed Date: 2026-06-20
+  Commit: fb86017
+- Slice 2: Begin splitting app.js responsibilities into focused modules with no behavior change.
+  Status: NOT STARTED
+
+Phase 2 (Safe Refactor, P0/P1)
+- Slice 1: Continue app.js decomposition (news key validation, state lookup, news fetch client, auth badge state).
+  Status: NOT STARTED
+- Slice 2: Add focused helper-level tests where practical.
+  Status: NOT STARTED
+
+Phase 3 (Safe-to-Moderate Refactor, P1)
+- Slice 1: Refactor shared backend auth route logic in server.js (config guard, response mapping, input normalization).
+  Status: NOT STARTED
+- Slice 2: Centralize state metadata source for client/server consistency.
+  Status: NOT STARTED
+
+Phase 4 (Optional Behavior Changes, P1/P2)
+- Slice 1: Revisit strict NewsAPI key client-side pattern policy.
+  Status: NOT STARTED
+- Slice 2: Improve friendly mapping for upstream NewsAPI errors.
+  Status: NOT STARTED
