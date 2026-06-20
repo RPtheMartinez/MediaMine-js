@@ -4,8 +4,7 @@
   "description": "A plain JavaScript app that shows top news headlines by U.S. state.",
   "main": "app.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
@@ -20,6 +19,8 @@
   },
   "homepage": "https://github.com/RPtheMartinez/MediaMine-js#readme",
   "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "@types/node": "^26.0.0",
     "playwright": "^1.61.0"
   },
   "dependencies": {
