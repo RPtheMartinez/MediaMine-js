@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediaMine Login</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <div class="top-nav">
+        <a class="signup-link" href="/index.html">Back To Home</a>
+        <a class="signup-link" href="/signup.html">Create Account</a>
+      </div>
+
+      <h1>📰 MediaMine</h1>
+      <p class="subtitle">Sign In</p>
+
+      <section class="card">
+        <form id="loginForm" novalidate>
+          <label for="email">Email *</label>
+          <input id="email" name="email" type="email" autocomplete="email" required />
+
+          <label for="password">Password *</label>
+          <input id="password" name="password" type="password" autocomplete="current-password" required />
+
+          <div id="loginFeedback" class="feedback" aria-live="polite"></div>
+
+          <button id="loginBtn" type="submit">Sign In</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="login.js"></script>
+  </body>
+</html>

@@ -73,9 +73,44 @@ const results = document.getElementById("results");
 const apiKeyInput = document.getElementById("apiKey");
 const toggleApiKeyBtn = document.getElementById("toggleApiKey");
 const formatButtons = Array.from(document.querySelectorAll("[data-format-button]"));
+const authStatus = document.getElementById("authStatus");
+const logoutBtn = document.getElementById("logoutBtn");
+
+const SESSION_USER_KEY = "mediamine.session.user";
 
 const SUPPORTED_FORMATS = new Set(["print", "video", "mix"]);
 let selectedFormat = "mix";
+
+function getSessionUser() {
+  const raw = sessionStorage.getItem(SESSION_USER_KEY);
+  if (!raw) return null;
+
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
+
+function renderAuthState() {
+  if (!authStatus || !logoutBtn) return;
+
+  const currentUser = getSessionUser();
+  if (!currentUser) {
+    authStatus.classList.add("hidden");
+    logoutBtn.classList.add("hidden");
+    return;
+  }
+
+  const displayName = [currentUser.firstName, currentUser.lastName]
+    .filter(Boolean)
+    .join(" ")
+    .trim() || currentUser.email || "User";
+
+  authStatus.textContent = `Signed in: ${displayName}`;
+  authStatus.classList.remove("hidden");
+  logoutBtn.classList.remove("hidden");
+}
 
 function ensureStateInputIsEditable({ focus = false, selectAll = false } = {}) {
   if (stateInput.type !== "text") {
@@ -330,3 +365,12 @@ fetchBtn.addEventListener("click", async () => {
 
 syncFormatButtonStates();
 syncFetchButtonState();
+renderAuthState();
+
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    sessionStorage.removeItem(SESSION_USER_KEY);
+    renderAuthState();
+    feedback.textContent = "You are signed out.";
+  });
+}

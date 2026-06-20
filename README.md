@@ -39,6 +39,46 @@ A plain JavaScript app that shows top news headlines by U.S. state.
 3. Enter your NewsAPI key.
 4. Click **Get News Headlines**.
 
+## Signup Setup (Starter)
+
+The app now includes:
+
+- A **Signup** link on the home page
+- A **Login** page at `/login.html`
+- A signup page at `/signup.html`
+- A backend endpoint at `POST /api/signup` that creates a Supabase Auth user
+- A backend endpoint at `POST /api/login` for email/password sign-in
+- Session-based signed-in state on the home page using `sessionStorage`
+
+To support profile data storage, create a `profiles` table in Supabase SQL Editor:
+
+```sql
+create table if not exists public.profiles (
+	id uuid primary key references auth.users(id) on delete cascade,
+	email text not null,
+	first_name text not null,
+	last_name text not null,
+	state text,
+	created_at timestamptz not null default now()
+);
+
+alter table public.profiles enable row level security;
+
+create policy "Users can read own profile"
+on public.profiles for select
+using (auth.uid() = id);
+
+create policy "Users can insert own profile"
+on public.profiles for insert
+with check (auth.uid() = id);
+
+create policy "Users can update own profile"
+on public.profiles for update
+using (auth.uid() = id);
+```
+
+If your Supabase project requires email confirmation, new users will need to confirm by email before full sign-in.
+
 ## Local Testing
 
 - Run end-to-end tests:

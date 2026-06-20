@@ -1,11 +1,41 @@
 const express = require("express");
 const path = require("path");
+const { createClient } = require("@supabase/supabase-js");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 5500;
 const supabaseUrl = (process.env.SUPABASE_URL || "").trim();
 const supabaseAnonKey = (process.env.SUPABASE_ANON_KEY || "").trim();
+
+function hasSupabaseConfig() {
+  return Boolean(supabaseUrl && supabaseAnonKey);
+}
+
+function createSupabaseAnonClient() {
+  if (!hasSupabaseConfig()) return null;
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  });
+}
+
+function createSupabaseAuthedClient(accessToken) {
+  if (!hasSupabaseConfig() || !accessToken) return null;
+  return createClient(supabaseUrl, supabaseAnonKey, {
+    global: {
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    },
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false
+    }
+  });
+}
 
 const SUPPORTED_FORMATS = new Set(["print", "video", "mix"]);
 const STATE_CODE_BY_NAME = {
@@ -174,12 +204,153 @@ function buildQueryForFormat(state, format) {
   return `${quotedState} (news OR video)`;
 }
 
+app.use(express.json());
 app.use(express.static(path.join(__dirname)));
 
 app.get("/api/config", (_req, res) => {
   return res.status(200).json({
     supabaseUrl,
     supabaseAnonKey
+  });
+});
+
+app.post("/api/signup", async (req, res) => {
+  if (!hasSupabaseConfig()) {
+    return res.status(500).json({
+      status: "error",
+      message: "Supabase is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env."
+    });
+  }
+
+  const supabaseClient = createSupabaseAnonClient();
+
+  const firstName = (req.body && req.body.firstName ? req.body.firstName : "").trim();
+  const lastName = (req.body && req.body.lastName ? req.body.lastName : "").trim();
+  const email = (req.body && req.body.email ? req.body.email : "").trim().toLowerCase();
+  const password = (req.body && req.body.password ? req.body.password : "").trim();
+  const state = (req.body && req.body.state ? req.body.state : "").trim();
+
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({
+      status: "error",
+      message: "Missing required fields: firstName, lastName, email, password."
+    });
+  }
+
+  if (password.length < 8) {
+    return res.status(400).json({
+      status: "error",
+      message: "Password must be at least 8 characters long."
+    });
+  }
+
+  const signup = await supabaseClient.auth.signUp({
+    email,
+    password,
+    options: {
+      data: {
+        first_name: firstName,
+        last_name: lastName,
+        state
+      }
+    }
+  });
+
+  if (signup.error) {
+    return res.status(400).json({
+      status: "error",
+      message: signup.error.message
+    });
+  }
+
+  const user = signup.data && signup.data.user ? signup.data.user : null;
+  const accessToken = signup.data && signup.data.session ? signup.data.session.access_token : null;
+  if (user && user.id && accessToken) {
+    const supabaseAuthedClient = createSupabaseAuthedClient(accessToken);
+    if (supabaseAuthedClient) {
+      const profileInsert = await supabaseAuthedClient
+        .from("profiles")
+        .upsert(
+          {
+            id: user.id,
+            email,
+            first_name: firstName,
+            last_name: lastName,
+            state
+          },
+          { onConflict: "id" }
+        );
+
+      if (profileInsert.error) {
+        console.warn("Could not upsert profiles row:", profileInsert.error.message);
+      }
+    }
+  }
+
+  return res.status(200).json({
+    status: "ok",
+    message: signup.data && signup.data.session
+      ? "Signup complete."
+      : "Signup submitted. Check your email to confirm your account.",
+    hasSession: Boolean(signup.data && signup.data.session),
+    user: user
+      ? {
+          id: user.id,
+          email: user.email || email,
+          firstName,
+          lastName,
+          state
+        }
+      : null
+  });
+});
+
+app.post("/api/login", async (req, res) => {
+  if (!hasSupabaseConfig()) {
+    return res.status(500).json({
+      status: "error",
+      message: "Supabase is not configured. Set SUPABASE_URL and SUPABASE_ANON_KEY in .env."
+    });
+  }
+
+  const supabaseClient = createSupabaseAnonClient();
+  const email = (req.body && req.body.email ? req.body.email : "").trim().toLowerCase();
+  const password = (req.body && req.body.password ? req.body.password : "").trim();
+
+  if (!email || !password) {
+    return res.status(400).json({
+      status: "error",
+      message: "Missing required fields: email, password."
+    });
+  }
+
+  const login = await supabaseClient.auth.signInWithPassword({ email, password });
+  if (login.error) {
+    return res.status(401).json({
+      status: "error",
+      message: login.error.message
+    });
+  }
+
+  const user = login.data && login.data.user ? login.data.user : null;
+  if (!user) {
+    return res.status(500).json({
+      status: "error",
+      message: "Could not load user profile after sign in."
+    });
+  }
+
+  const userMeta = user.user_metadata || {};
+  return res.status(200).json({
+    status: "ok",
+    message: "Signed in successfully.",
+    user: {
+      id: user.id,
+      email: user.email || email,
+      firstName: userMeta.first_name || "",
+      lastName: userMeta.last_name || "",
+      state: userMeta.state || ""
+    }
   });
 });
 

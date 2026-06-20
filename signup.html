@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MediaMine Signup</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="container">
+      <div class="top-nav">
+        <a class="signup-link" href="/index.html">Back To Home</a>
+        <a class="signup-link" href="/login.html">Login</a>
+      </div>
+
+      <h1>📰 MediaMine</h1>
+      <p class="subtitle">Create Your Account</p>
+
+      <section class="card">
+        <form id="signupForm" novalidate>
+          <div class="form-grid">
+            <div>
+              <label for="firstName">First Name *</label>
+              <input id="firstName" name="firstName" type="text" autocomplete="given-name" required />
+            </div>
+            <div>
+              <label for="lastName">Last Name *</label>
+              <input id="lastName" name="lastName" type="text" autocomplete="family-name" required />
+            </div>
+          </div>
+
+          <label for="email">Email *</label>
+          <input id="email" name="email" type="email" autocomplete="email" required />
+
+          <label for="state">State</label>
+          <input id="state" name="state" type="text" placeholder="Optional" autocomplete="address-level1" />
+
+          <label for="password">Password *</label>
+          <input id="password" name="password" type="password" minlength="8" autocomplete="new-password" required />
+
+          <label for="confirmPassword">Confirm Password *</label>
+          <input id="confirmPassword" name="confirmPassword" type="password" minlength="8" autocomplete="new-password" required />
+
+          <div id="signupFeedback" class="feedback" aria-live="polite"></div>
+
+          <button id="signupBtn" type="submit">Create Account</button>
+        </form>
+      </section>
+    </main>
+
+    <script src="signup.js"></script>
+  </body>
+</html>
