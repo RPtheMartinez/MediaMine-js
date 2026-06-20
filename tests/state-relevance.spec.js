@@ -6,6 +6,7 @@ const NEWS_API_KEY = process.env.NEWS_API_KEY || process.env.NEWSAPI_KEY || "";
 const HAS_NEWS_API_KEY = NEWS_API_KEY.length > 0;
 
 test.describe("state relevance filtering", () => {
+  // These tests rely on real upstream NewsAPI responses, so skip in environments without a key.
   test.skip(!HAS_NEWS_API_KEY, "Set NEWS_API_KEY (or NEWSAPI_KEY) to run state relevance API tests.");
 
   ["print", "video", "mix"].forEach((format) => {

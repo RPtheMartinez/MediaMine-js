@@ -102,6 +102,7 @@ function validateApiKeyField({ showFeedback = false } = {}) {
     return false;
   }
 
+  // This is a client-side sanity check only; backend/upstream remains source of truth.
   const isValid = isLikelyNewsApiKey(apiKey);
 
   if (hasBlurredApiKey || showFeedback) {
@@ -385,6 +386,7 @@ apiKeyInput.addEventListener("input", () => {
 });
 
 apiKeyInput.addEventListener("blur", () => {
+  // Delay visible validation noise until first blur to keep initial typing flow smooth.
   hasBlurredApiKey = true;
   validateApiKeyField({ showFeedback: true });
   syncFetchButtonState();

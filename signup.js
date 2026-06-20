@@ -4,7 +4,7 @@ const signupBtn = document.getElementById("signupBtn");
 const passwordInput = document.getElementById("password");
 const confirmPasswordInput = document.getElementById("confirmPassword");
 const passwordToggles = Array.from(document.querySelectorAll("[data-password-toggle]"));
-const SESSION_USER_KEY = "mediamine.session.user";
+const { postJson, setFeedbackState, setSessionUser } = window.MediaMineAuth;
 
 function validatePasswordMatch() {
   const password = String(passwordInput.value || "");
@@ -47,40 +47,11 @@ passwordInput.addEventListener("input", validatePasswordMatch);
 confirmPasswordInput.addEventListener("input", validatePasswordMatch);
 
 function setSignupFeedback(message, status) {
-  signupFeedback.textContent = message;
-  signupFeedback.classList.remove("feedback-success", "feedback-error");
-
-  if (status === "success") {
-    signupFeedback.classList.add("feedback-success");
-  }
-
-  if (status === "error") {
-    signupFeedback.classList.add("feedback-error");
-  }
+  setFeedbackState(signupFeedback, message, status);
 }
 
 async function createAccount(payload) {
-  const response = await fetch("/api/signup", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  let body = null;
-  try {
-    body = await response.json();
-  } catch {
-    body = null;
-  }
-
-  if (!response.ok) {
-    const errorMessage = body && body.message ? body.message : `HTTP ${response.status}`;
-    throw new Error(errorMessage);
-  }
-
-  return body;
+  return postJson("/api/signup", payload);
 }
 
 signupForm.addEventListener("submit", async (event) => {
@@ -127,7 +98,7 @@ signupForm.addEventListener("submit", async (event) => {
     setSignupFeedback(successMessage, "success");
 
     if (result && result.hasSession && result.user) {
-      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(result.user));
+      setSessionUser(result.user);
       window.location.href = "/index.html";
       return;
     }

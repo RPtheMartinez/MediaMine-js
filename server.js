@@ -16,6 +16,7 @@ function hasPlaceholderSupabaseConfig() {
   const lowerUrl = supabaseUrl.toLowerCase();
   const lowerKey = supabaseAnonKey.toLowerCase();
 
+  // Prevent confusing network failures when template values are copied but not replaced.
   return (
     lowerUrl.includes("your-project-ref") ||
     lowerKey.includes("your_supabase_anon_key")

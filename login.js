@@ -2,44 +2,14 @@ const loginForm = document.getElementById("loginForm");
 const loginFeedback = document.getElementById("loginFeedback");
 const loginBtn = document.getElementById("loginBtn");
 
-const SESSION_USER_KEY = "mediamine.session.user";
+const { postJson, setFeedbackState, setSessionUser } = window.MediaMineAuth;
 
 function setLoginFeedback(message, status) {
-  loginFeedback.textContent = message;
-  loginFeedback.classList.remove("feedback-success", "feedback-error");
-
-  if (status === "success") {
-    loginFeedback.classList.add("feedback-success");
-  }
-
-  if (status === "error") {
-    loginFeedback.classList.add("feedback-error");
-  }
+  setFeedbackState(loginFeedback, message, status);
 }
 
 async function signIn(payload) {
-  const response = await fetch("/api/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
-
-  let body = null;
-
-  try {
-    body = await response.json();
-  } catch {
-    body = null;
-  }
-
-  if (!response.ok) {
-    const errorMessage = body && body.message ? body.message : `HTTP ${response.status}`;
-    throw new Error(errorMessage);
-  }
-
-  return body;
+  return postJson("/api/login", payload);
 }
 
 loginForm.addEventListener("submit", async (event) => {
@@ -59,7 +29,7 @@ loginForm.addEventListener("submit", async (event) => {
   try {
     const result = await signIn({ email, password });
     if (result && result.user) {
-      sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(result.user));
+      setSessionUser(result.user);
     }
 
     setLoginFeedback("Sign in successful. Redirecting...", "success");
